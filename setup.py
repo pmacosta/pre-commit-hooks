@@ -31,7 +31,7 @@ setup(
     install_requires=[],
     entry_points={
         "console_scripts": [
-            "identity = pre_commit_hooks.identity:main",
+            "identity = pre_commit_hooks.identity:check_identity",
         ]
     },
 )

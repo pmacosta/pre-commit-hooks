@@ -6,6 +6,7 @@
 
 # Standard library imports
 from __future__ import print_function
+import argparse
 import os
 import re
 import subprocess
@@ -15,14 +16,6 @@ import sys
 ###
 # Functions
 ###
-def _git_cfg(token):
-    """Return value of Git configuration field/token."""
-    stdout, _ = subprocess.Popen(
-        ["git", "config", token], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    ).communicate()
-    return stdout.strip()
-
-
 def _authors(fname):
     """Parse file and return user name and email of authors.
 
@@ -32,7 +25,7 @@ def _authors(fname):
     if not os.path.exists(fname):
         raise RuntimeError("File {} not found".format(fname))
     with open(fname, "r") as obj:
-        lines = [item.strip() for item in obj.readlines()]
+        lines = [_tostr(item.strip()) for item in obj.readlines()]
     regexp = re.compile(r"(?:\s*\*\s+)?(.*)\s+<(.*)>.*")
     for line in lines:
         match = regexp.match(line)
@@ -41,22 +34,47 @@ def _authors(fname):
             yield name, email
 
 
-def main(args):
+def _git_cfg(token):
+    """Return value of Git configuration field/token."""
+    stdout, _ = subprocess.Popen(
+        ["git", "config", token], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ).communicate()
+    return _tostr(stdout).strip()
+
+
+def _tostr(line):  # pragma: no cover
+    return (
+        line
+        if isinstance(line, str)
+        else (line.decode() if sys.hexversion > 0x03000000 else line.encode())
+    )
+
+
+def check_identity(argv=None):
     """Script entry point."""
-    if len(args) > 1:
-        raise RuntimeError('Too many input arguments')
-    fname = os.path.abspath(args[0])
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "-a", "--author-file", help="Author(s) file", nargs=1, required=True
+    )
+    parser.add_argument("files", nargs="*", help="Files in commit")
+    args = parser.parse_args(argv)
+    author_file = args.author_file[0]
+    #
     git_name = _git_cfg("user.name")
     git_email = _git_cfg("user.email")
-    ret_code = 0
-    for name, email in _authors(fname):
+    retval = 0
+    for name, email in _authors(author_file):
         if (git_name, git_email) == (name, email):
             break
     else:
-        print("Author {} <{}> not found in {} file".format(git_name, git_email, fname))
-        ret_code = 1
-    sys.exit(ret_code)
+        print(
+            "Author {} <{}> not found in {} file".format(
+                git_name, git_email, author_file
+            )
+        )
+        retval = 1
+    return retval
 
 
 if __name__ == "__main__":
-    main(sys.argv[1:])
+    sys.exit(check_identity())
