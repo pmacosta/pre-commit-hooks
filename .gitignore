@@ -1,4 +1,5 @@
 *.pyc
+.hooks/repo-cfg.sh
 .tox/
 dist/
 *.egg-info/
