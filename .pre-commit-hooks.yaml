@@ -1,0 +1,7 @@
+# yamllint disable rule:document-start
+- id: identity
+  name: identity
+  description: 'Check git user name and email against list of authors'
+  entry: identity
+  language: python
+  types: [python]

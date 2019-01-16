@@ -1,0 +1,6 @@
+*.pyc
+.tox/
+dist/
+*.egg-info/
+.pytest_cache/
+tests/support/_build/
