@@ -5,3 +5,10 @@
   entry: identity
   language: python
   types: [python]
+- id: pydocstyle_wrapper
+  name: pydocstyle_wrapper
+  description: 'Wrapper for the PEP257 checker utility'
+  entry: pydocstyle_wrapper
+  language: python
+  types: [python]
+  additional_dependencies: ['pydocstyle']

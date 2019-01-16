@@ -32,6 +32,7 @@ setup(
     entry_points={
         "console_scripts": [
             "identity = pre_commit_hooks.identity:check_identity",
+            "pydocstyle_wrapper = pre_commit_hooks.pydocstyle_wrapper:check_pydocstyle",
         ]
     },
 )
