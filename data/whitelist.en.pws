@@ -1,9 +1,10 @@
-personal_ws-1.1 en 80 utf-8
+personal_ws-1.1 en 91 utf-8
 abspath
 argparse
 args
 ARGS
 ArgumentParser
+ArgumentTypeError
 argv
 asort
 aspell
@@ -15,7 +16,9 @@ CLI
 cmd
 CMD
 config
+CPython
 curdir
+defaultdict
 defpath
 dir
 env
@@ -24,19 +27,25 @@ fn
 fname
 fnames
 fnmatch
+fobj
 gztar
 hexversion
 ImportError
 io
 isinstance
 lastword
+ldict
 len
 Makefile
 MAKEFILE
+matcher
 MERCHANTABILITY
 nargs
 normdir
+num
+onE
 os
+OSI
 pathext
 PATHEXT
 pkl
@@ -63,6 +72,7 @@ rtest
 RuntimeError
 sdist
 Serafini
+setuptools
 shellcheck
 shutil
 stderr
@@ -75,6 +85,8 @@ thefile
 tmp
 tostr
 tox
+url
 usr
 whitelist
 wlist
+zA

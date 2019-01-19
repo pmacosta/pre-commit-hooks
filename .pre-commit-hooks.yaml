@@ -12,3 +12,10 @@
   language: python
   types: [python]
   additional_dependencies: ['pydocstyle']
+- id: spelling
+  name: spelling
+  description: 'Spellcheck with Aspell'
+  entry: spelling
+  language: python
+  types: [text]
+  exclude_types: [binary]
