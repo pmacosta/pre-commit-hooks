@@ -93,7 +93,7 @@ class HeaderChecker(BaseChecker):
             "Header does not meet code standard",
             NON_COMPLIANT_HEADER,
             (
-                "Headers must have the name of th efile in the first usable line, "
+                "Headers must have the name of the efile in the first usable line, "
                 "and an up-to-date copyright notice"
             ),
         )
@@ -109,5 +109,5 @@ class HeaderChecker(BaseChecker):
 
 
 def register(linter):
-    """Regiester checker."""
+    """Register checker."""
     linter.register_checker(HeaderChecker(linter))
