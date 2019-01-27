@@ -6,7 +6,11 @@ PKG_DIR := $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 REPO_DIR ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SOURCE_DIR ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/pre_commit_hooks
 EXTRA_DIR ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
-PYLINT_CMD := pylint --rcfile=$(EXTRA_DIR)/.pylintrc -f colorized -r no
+PYLINT_CMD := pylint \
+	--rcfile=$(EXTRA_DIR)/.pylintrc \
+	--load-plugins=aspell,header,pylint_codes \
+	-f colorized \
+	-r no
 
 asort:
 	@echo "Sorting Aspell whitelist"
@@ -45,11 +49,14 @@ FORCE:
 lint:
 	@echo "Running Pylint on package files"
 	@echo "Directory $(REPO_DIR)"
-	@$(PYLINT_CMD) $(REPO_DIR)/*.py
+	@PYTHONPATH="$(PYTHONPATH):$(PYLINT_PLUGINS_DIR)" \
+		$(PYLINT_CMD) $(REPO_DIR)/*.py
 	@echo "Directory $(SOURCE_DIR)"
-	@$(PYLINT_CMD) $(SOURCE_DIR)/*.py
+	@PYTHONPATH="$(PYTHONPATH):$(PYLINT_PLUGINS_DIR)" \
+		$(PYLINT_CMD) $(SOURCE_DIR)/*.py
 	@echo "Directory $(REPO_DIR)/pylint_plugins"
-	@$(PYLINT_CMD) $(REPO_DIR)/pylint_plugins/*.py
+	@PYTHONPATH="$(PYTHONPATH):$(PYLINT_PLUGINS_DIR)"\
+		$(PYLINT_CMD) $(REPO_DIR)/pylint_plugins/*.py
 	#@$(PYLINT_CMD) $(EXTRA_DIR)/tests/*.py
 	#@$(PYLINT_CMD) $(EXTRA_DIR)/tests/support/*.py
 sdist:
