@@ -1,4 +1,4 @@
-personal_ws-1.1 en 120 utf-8
+personal_ws-1.1 en 124 utf-8
 abspath
 argparse
 args
@@ -22,6 +22,7 @@ config
 CPython
 cregexp
 curdir
+curr_dir
 datetime
 defaultdict
 defpath
@@ -36,8 +37,10 @@ fname
 fnames
 fnmatch
 fobj
+fullname
 gztar
 HeaderChecker
+headerrc
 hexversion
 ImportError
 init
@@ -56,6 +59,7 @@ Makefile
 MAKEFILE
 matcher
 MERCHANTABILITY
+metavar
 msgs
 nargs
 normdir
