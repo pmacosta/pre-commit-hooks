@@ -31,6 +31,7 @@ setup(
     install_requires=[],
     entry_points={
         "console_scripts": [
+            "header = pre_commit_hooks.header:check_header",
             "identity = pre_commit_hooks.identity:check_identity",
             "pydocstyle_wrapper = pre_commit_hooks.pydocstyle_wrapper:check_pydocstyle",
             "spelling = pre_commit_hooks.spelling:check_spelling",

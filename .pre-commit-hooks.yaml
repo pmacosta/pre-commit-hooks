@@ -1,10 +1,14 @@
 # yamllint disable rule:document-start
+- id: header
+  name: header
+  description: 'Check header matches reference template'
+  entry: header
+  language: python
 - id: identity
   name: identity
   description: 'Check git user name and email against list of authors'
   entry: identity
   language: python
-  types: [python]
 - id: pydocstyle_wrapper
   name: pydocstyle_wrapper
   description: 'Wrapper for the PEP257 checker utility'
