@@ -44,10 +44,14 @@ FORCE:
 
 lint:
 	@echo "Running Pylint on package files"
+	@echo "Directory $(REPO_DIR)"
 	@$(PYLINT_CMD) $(REPO_DIR)/*.py
+	@echo "Directory $(SOURCE_DIR)"
 	@$(PYLINT_CMD) $(SOURCE_DIR)/*.py
-	@$(PYLINT_CMD) $(EXTRA_DIR)/tests/*.py
-	@$(PYLINT_CMD) $(EXTRA_DIR)/tests/support/*.py
+	@echo "Directory $(REPO_DIR)/pylint_plugins"
+	@$(PYLINT_CMD) $(REPO_DIR)/pylint_plugins/*.py
+	#@$(PYLINT_CMD) $(EXTRA_DIR)/tests/*.py
+	#@$(PYLINT_CMD) $(EXTRA_DIR)/tests/support/*.py
 sdist:
 	@echo "Creating source distribution"
 	@cd $(PKG_DIR) && python setup.py sdist --formats=gztar,zip
