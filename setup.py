@@ -34,6 +34,7 @@ setup(
             "header = pre_commit_hooks.header:check_header",
             "identity = pre_commit_hooks.identity:check_identity",
             "pydocstyle_wrapper = pre_commit_hooks.pydocstyle_wrapper:check_pydocstyle",
+            "pylint_codes = pre_commit_hooks.pylint_codes:check_pylint_codes",
             "spelling = pre_commit_hooks.spelling:check_spelling",
         ]
     },

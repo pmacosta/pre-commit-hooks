@@ -16,6 +16,13 @@
   language: python
   types: [python]
   additional_dependencies: ['pydocstyle']
+- id: pylint_codes
+  name: pylint_codes
+  description: 'Check pylint codes are unique and alphabetitcally sorted'
+  entry: pylint_codes
+  language: python
+  types: [python]
+  additional_dependencies: ['pylint']
 - id: spelling
   name: spelling
   description: 'Spellcheck with Aspell'
