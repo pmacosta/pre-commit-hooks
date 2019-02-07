@@ -84,6 +84,14 @@ def _find_header_ref(fname):
     return ""
 
 
+def _make_abspath(value):
+    """Homogenize files to have absolute paths."""
+    value = value.strip()
+    if not os.path.isabs(value):
+        value = os.path.abspath(os.path.join(os.getcwd(), value))
+    return value
+
+
 def _read_file(fname):
     """Return file lines as strings."""
     with open(fname) as fobj:
@@ -98,8 +106,7 @@ def _tostr(obj):  # pragma: no cover
 
 def _valid_file(value):
     """Check that a file exists and returned it converted to absolute path."""
-    if not os.path.isabs(value):
-        value = os.path.abspath(os.path.join(os.getcwd(), value))
+    value = _make_abspath(value)
     if not os.path.exists(value):
         raise argparse.ArgumentTypeError("File {0} does not exist".format(value))
     return value
@@ -116,7 +123,7 @@ def check_header(argv=None):
     ###
     fnames = cli_args.files
     if cli_args.exclude:
-        patterns = list(_read_file(cli_args.exclude[0]))
+        patterns = [_make_abspath(item) for item in _read_file(cli_args.exclude[0])]
         exclude_filter = lambda x: not any(fnmatch(x, pattern) for pattern in patterns)
         fnames = filter(exclude_filter, fnames)
     ###
