@@ -242,8 +242,8 @@ fi
 if [ "${code_standard}" == 1 ]; then
     script="${pkg_dir}/bin/check_files_compliance.py"
     if [ ! -f "${script}" ]; then
-        >&2 echo -e "Error: code compliance script ${script} not found"
-        exit 1
+        >&2 echo -e "Warning: code compliance script ${script} not found, skipping"
+        exit 0
     fi
     if [ "${print}" == 1 ]; then
         echo -e "\tChecking code standard compliance"
