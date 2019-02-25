@@ -7,14 +7,15 @@ REPO_DIR ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 SOURCE_DIR ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))/pre_commit_hooks
 EXTRA_DIR ?= $(dir $(abspath $(lastword $(MAKEFILE_LIST))))
 ### Custom pylint plugins configuration
-PYLINT_PLUGINS_DIR := $(shell if [ -d $(REPO_DIR)/pylint_plugins ]; then echo "$(REPO_DIR)/pylint_plugins"; fi)
-PYLINT_PLUGINS_LIST := $(shell if [ -d $(REPO_DIR)/pylint_plugins ]; then cd $(REPO_DIR)/pylint_plugins && ls -m *.py | sed 's|.*/||g' | sed 's|, |,|g' | sed 's|\.py||g'; fi)
-PYLINT_CLI_APPEND := $(shell if [ -d $(REPO_DIR)/pylint_plugins ]; then echo "--load-plugins=$(PYLINT_PLUGINS_LIST)"; fi)
+PYLINT_PLUGINS_DIR := $(shell if [ -d $(EXTRA_DIR)/pylint_plugins ]; then echo "$(EXTRA_DIR)/pylint_plugins"; fi)
+PYLINT_PLUGINS_LIST := $(shell if [ -d $(EXTRA_DIR)/pylint_plugins ]; then cd $(EXTRA_DIR)/pylint_plugins && ls -m *.py | sed 's|.*/||g' | sed 's|, |,|g' | sed 's|\.py||g'; fi)
+PYLINT_CLI_APPEND := $(shell if [ -d $(EXTRA_DIR)/pylint_plugins ]; then echo "--load-plugins=$(PYLINT_PLUGINS_LIST)"; fi)
 PYLINT_CMD := pylint \
 	--rcfile=$(EXTRA_DIR)/.pylintrc \
 	$(PYLINT_CLI_APPEND) \
-	-f colorized \
-	-r no
+	--output-format=colorized \
+	--reports=no \
+	--score=no
 ###
 
 asort:
@@ -28,9 +29,7 @@ bdist:
 black:
 	black \
 		$(REPO_DIR) \
-		$(SOURCE_DIR)/shellcheck.py \
-		$(EXTRA_DIR)/tests \
-		$(EXTRA_DIR)/tests/support
+		$(SOURCE_DIR)/ \
 
 clean: FORCE
 	@echo "Cleaning package"
@@ -45,6 +44,7 @@ clean: FORCE
 	@rm -rf $(PKG_DIR)/.eggs
 	@rm -rf $(PKG_DIR)/.cache
 	@rm -rf $(PKG_DIR)/tests/support/_build
+	@rm -rf $(PKG_DIR)/.tox
 
 default:
 	@echo "No default action"
@@ -59,19 +59,3 @@ lint:
 	@echo "Directory $(SOURCE_DIR)"
 	@PYTHONPATH="$(PYTHONPATH):$(PYLINT_PLUGINS_DIR)" \
 		$(PYLINT_CMD) $(SOURCE_DIR)/*.py
-	@echo "Directory $(REPO_DIR)/pylint_plugins"
-	@PYTHONPATH="$(PYTHONPATH):$(PYLINT_PLUGINS_DIR)"\
-		$(PYLINT_CMD) $(REPO_DIR)/pylint_plugins/*.py
-	#@$(PYLINT_CMD) $(EXTRA_DIR)/tests/*.py
-	#@$(PYLINT_CMD) $(EXTRA_DIR)/tests/support/*.py
-sdist:
-	@echo "Creating source distribution"
-	@cd $(PKG_DIR) && python setup.py sdist --formats=gztar,zip
-	@$(PKG_DIR)/bin/list-authors.sh
-
-sterile: clean
-	@echo "Removing tox directory"
-	@rm -rf $(PKG_DIR)/.tox
-
-test: FORCE
-	@$(PKG_DIR)/bin/rtest.sh $(ARGS)

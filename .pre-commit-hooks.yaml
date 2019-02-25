@@ -30,3 +30,4 @@
   language: python
   types: [text]
   exclude_types: [binary]
+  additional_dependencies: ['decorator']

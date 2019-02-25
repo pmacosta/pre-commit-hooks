@@ -127,19 +127,13 @@ def check_header(argv=None):
         exclude_filter = lambda x: not any(fnmatch(x, pattern) for pattern in patterns)
         fnames = filter(exclude_filter, fnames)
     ###
-    fdict = {
-        '.py': '#',
-        '.rst': '..',
-        '.ini': '#',
-        '.sh': '#',
-        '.cfg': '#',
-    }
+    fdict = {".py": "#", ".rst": "..", ".ini": "#", ".sh": "#", ".cfg": "#"}
     retval = 0
     for fname in fnames:
         _, ext = os.path.splitext(fname)
         if (ext in fdict) and _check_header(fname, fdict[ext]):
             retval = 1
-            print("    "+fname)
+            print("    " + fname)
     return retval
 
 

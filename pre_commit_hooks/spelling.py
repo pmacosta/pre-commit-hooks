@@ -2,18 +2,24 @@
 # spelling.py
 # Copyright (c) 2019 Pablo Acosta-Serafini
 # See LICENSE for details
-# pylint: disable=C0103,C0111,R0912,R0914,R1718
+# pylint: disable=C0103,C0111,E1129,R0205,R0912,R0914,R1718,W0640,W1113
 
 # Standard library imports
 from __future__ import print_function
 import argparse
 import collections
 from fnmatch import fnmatch
-import io
 import os
+import platform
 import re
-from subprocess import Popen, PIPE
+import subprocess
 import sys
+import tempfile
+import time
+import types
+
+# PyPI imports
+import decorator
 
 # Literal copy from [...]/site-packages/pip/_vendor/compat.py
 try:
@@ -84,17 +90,62 @@ IS_PY3 = sys.hexversion > 0x03000000
 ###
 # Functions
 ###
+@decorator.contextmanager
+def ignored(*exceptions):
+    try:
+        yield
+    except exceptions:
+        pass
+
+
+class TmpFile(object):
+    """
+    Use a temporary file within context.
+
+    From pmisc package
+    """
+
+    def __init__(self, fpointer=None, *args, **kwargs):  # noqa
+        if (
+            fpointer
+            and (not isinstance(fpointer, types.FunctionType))
+            and (not isinstance(fpointer, types.LambdaType))
+        ):
+            raise RuntimeError("Argument `fpointer` is not valid")
+        self._fname = None
+        self._fpointer = fpointer
+        self._args = args
+        self._kwargs = kwargs
+
+    def __enter__(self):  # noqa
+        fdesc, fname = tempfile.mkstemp()
+        # fdesc is an OS-level file descriptor, see problems if this
+        # is not properly closed in this post:
+        # https://www.logilab.org/blogentry/17873
+        os.close(fdesc)
+        if platform.system().lower() == "windows":  # pragma: no cover
+            fname = fname.replace(os.sep, "/")
+        self._fname = fname
+        if self._fpointer:
+            with open(self._fname, "w") as fobj:
+                self._fpointer(fobj, *self._args, **self._kwargs)
+        return self._fname
+
+    def __exit__(self, exc_type, exc_value, exc_tb):  # noqa
+        with ignored(OSError):
+            os.remove(self._fname)
+        return not exc_type is not None
+
+
 def _cleanup_word(word):
     """Strip out leading trailing spaces, quotes and double quotes."""
     if not word.strip():
         return ""
-    new_word = word.strip().strip('"').strip().strip("'").strip()
-    new_word = new_word.strip('"').strip().strip("'")
-    while new_word != word:
-        word = new_word
-        new_word = word.strip().strip('"').strip().strip("'").strip()
-        new_word = new_word.strip('"').strip().strip("'")
-    return new_word
+    regexp = re.compile(r"(?:[^a-zA-Z]*|^)*([a-zA-Z]+)(?:[^a-zA-Z]*|$)*")
+    match = regexp.match(word)
+    if match:
+        return match.groups()[0].strip()
+    return ""
 
 
 def _grep(fname, words):
@@ -122,6 +173,33 @@ def _read_file(fname):
     with open(fname) as fobj:
         for line in fobj:
             yield _tostr(line).strip()
+
+
+def _shcmd(cmd, timeout=15):
+    """Safely execute shell command."""
+    delay = 1.0
+    obj = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if sys.hexversion < 0x03000000:
+        while (obj.poll() is None) and (timeout > 0):
+            time.sleep(delay)
+            timeout -= delay
+        if not timeout:
+            obj.kill()
+        stdout, stderr = obj.communicate()
+    else:
+        try:
+            stdout, stderr = obj.communicate(timeout=timeout)
+        except subprocess.TimeoutExpired:
+            obj.kill()
+            stdout, stderr = obj.communicate()
+    if obj.returncode:
+        print("COMMAND: " + (" ".join(cmd)))
+        print("STDOUT:" + os.linesep + _tostr(stdout))
+        print("STDERR:" + os.linesep + _tostr(stderr))
+        raise RuntimeError("hunspell command could not be executed successfully")
+    stdout = _tostr(stdout).split(os.linesep)
+    stderr = _tostr(stderr).split(os.linesep)
+    return stdout
 
 
 def _tostr(obj):  # pragma: no cover
@@ -166,17 +244,22 @@ def check_spelling(argv=None):
     retval = 0
     base_cmd = ["hunspell"] + cmd_args + ["-l"]
     for fname in fnames:
-        cmd = base_cmd + [fname]
-        obj = Popen(cmd, stdout=PIPE, stderr=PIPE)
-        stdout = _tostr(obj.communicate()[0]).split(os.linesep)
+        # First pass
+        stdout = _shcmd(base_cmd + [fname])
         words = [_cleanup_word(word) for word in stdout if word.strip()]
-        words = sorted(list(set([word for word in words if word])))
+        words = sorted(list(set([word for word in words if word.strip()])))
+        # Second pass
+        func = lambda x: x.write(os.linesep.join(words))
+        with TmpFile(func) as temp_fname:
+            stdout = _shcmd(base_cmd + [temp_fname])
+        words = sorted(list(set([word.strip() for word in stdout if word.strip()])))
+        #
         header_printed = False
         if words:
             retval = 1
             ldict = _grep(fname, words)
             if not header_printed:
-                print("Base command: "+(" ".join(base_cmd)))
+                print("Base command: " + (" ".join(base_cmd)))
                 header_printed = True
             print(fname)
             for word, lines in [(word, ldict[word]) for word in words]:

@@ -7,6 +7,7 @@
 # Standard library imports
 import re
 import sys
+
 # PyPI imports
 from pydocstyle.cli import main
 
@@ -19,6 +20,6 @@ def check_pydocstyle(argv=None):
     return main()
 
 
-if __name__ == '__main__':
-    sys.argv[0] = re.sub(r'(-script\.pyw?|\.exe)?$', '', sys.argv[0])
+if __name__ == "__main__":
+    sys.argv[0] = re.sub(r"(-script\.pyw?|\.exe)?$", "", sys.argv[0])
     sys.exit(check_pydocstyle(sys.argv))
