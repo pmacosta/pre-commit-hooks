@@ -1,3 +1,3 @@
 {comment} {basename}
-{comment} Copyright (c) {current_year} Pablo Acosta-Serafini
+{comment} Copyright \(c\) (2019-{current_year}|{current_year}) Pablo Acosta-Serafini
 {comment} See LICENSE for details

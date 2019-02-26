@@ -49,7 +49,8 @@ def _check_header(fname, comment="#", header_ref=""):
     for (num, line), ref in zip(_content_lines(stream, comment), header_lines):
         if num > len(header_lines):
             break
-        if line != ref:
+        regexp = re.compile(ref)
+        if not regexp.match(line):
             return True
     return False
 
