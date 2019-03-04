@@ -46,7 +46,7 @@ def _check_header(fname, comment="#", header_ref=""):
             )
         )
     stream = _read_file(fname)
-    for (num, line), ref in zip(_content_lines(stream, comment), header_lines):
+    for (_, line), ref in zip(_content_lines(stream, comment), header_lines):
         regexp = re.compile(ref)
         if not regexp.match(line):
             return True
@@ -61,7 +61,6 @@ def _content_lines(stream, comment="#"):
     shebang_line = False
     in_mod_docstring = False
     mod_string_done = False
-    capture_offset = False
     cregexp = re.compile(r"^{0} -\*- coding: utf-8 -\*-\s*".format(comment))
     for num, line in enumerate(stream):
         line = _tostr(line).rstrip()
@@ -74,7 +73,7 @@ def _content_lines(stream, comment="#"):
         # Skip file encoding line
         if (num == int(shebang_line)) and cregexp.match(line):
             continue
-        # Skip single-line module docstrings
+        # Skip single-line module docstring
         if (not num) and sl_mod_docstring.match(line):
             continue
         if (not num) and (not mod_string_done) and line.startswith('"""'):
@@ -151,7 +150,7 @@ def check_header(argv=None):
         _, ext = os.path.splitext(fname)
         if (ext in fdict) and _check_header(fname, fdict[ext]):
             retval = 1
-            print("    " + fname)
+            print("    " + fname.strip())
     return retval
 
 
