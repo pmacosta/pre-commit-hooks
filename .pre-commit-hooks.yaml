@@ -10,7 +10,7 @@
   entry: identity
   language: python
 - id: pydocstyle_wrapper
-  name: Check file complies iwth PE257
+  name: Check file complies with PE257
   description: 'Wrapper for the PEP257 checker utility'
   entry: pydocstyle_wrapper
   language: python
