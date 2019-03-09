@@ -1,33 +1,32 @@
 # yamllint disable rule:document-start
 - id: header
-  name: header
+  name: Check file header commplies with project template
   description: 'Check header matches reference template'
   entry: header
   language: python
 - id: identity
-  name: identity
+  name: Check commiter is in authors list
   description: 'Check git user name and email against list of authors'
   entry: identity
   language: python
 - id: pydocstyle_wrapper
-  name: pydocstyle_wrapper
+  name: Check file complies iwth PE257
   description: 'Wrapper for the PEP257 checker utility'
   entry: pydocstyle_wrapper
   language: python
   types: [python]
   additional_dependencies: ['pydocstyle']
 - id: pylint_codes
-  name: pylint_codes
+  name: Check Pylint disable codes sorted alphabetically
   description: 'Check pylint codes are unique and alphabetitcally sorted'
   entry: pylint_codes
   language: python
   types: [python]
   additional_dependencies: ['pylint']
 - id: spelling
-  name: spelling
+  name: Check spelling
   description: 'Spellcheck with Aspell'
   entry: spelling
   language: python
   types: [text]
   exclude_types: [binary]
-  additional_dependencies: ['decorator']
