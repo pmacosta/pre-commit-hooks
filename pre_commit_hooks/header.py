@@ -20,9 +20,9 @@ IS_PY3 = sys.hexversion > 0x03000000
 
 
 ###
-# Functions
+# Functions (common with plugin)
 ###
-def _check_header(fname, comment="#", header_ref=""):
+def _check_header(fname, streamer, comment="#", header_ref=""):
     """Check that all files have header line and copyright notice."""
     # pylint: disable=W0702
     header_ref = header_ref.strip() or _find_header_ref(fname)
@@ -37,20 +37,19 @@ def _check_header(fname, comment="#", header_ref=""):
     current_year = datetime.datetime.now().year
     header_lines = []
     for line in _read_file(header_ref):
-        header_lines.append(
-            line.format(
-                comment=comment,
-                fullname=fullname,
-                basename=basename,
-                current_year=current_year,
-            )
+        line = line.format(
+            comment=comment,
+            fullname=fullname,
+            basename=basename,
+            current_year=current_year,
         )
-    stream = _read_file(fname)
-    for (_, line), ref in zip(_content_lines(stream, comment), header_lines):
-        regexp = re.compile(ref)
-        if not regexp.match(line):
-            return True
-    return False
+        header_lines.append(re.compile("^" + line + "$"))
+    linenos = []
+    with streamer(fname) as stream:
+        for (num, line), regexp in zip(_content_lines(stream, comment), header_lines):
+            if not regexp.match(line):
+                linenos.append(num)
+    return linenos
 
 
 def _content_lines(stream, comment="#"):
@@ -101,14 +100,6 @@ def _find_header_ref(fname):
     return ""
 
 
-def _make_abspath(value):
-    """Homogenize files to have absolute paths."""
-    value = value.strip()
-    if not os.path.isabs(value):
-        value = os.path.abspath(os.path.join(os.getcwd(), value))
-    return value
-
-
 def _read_file(fname):
     """Return file lines as strings."""
     with open(fname) as fobj:
@@ -119,6 +110,33 @@ def _read_file(fname):
 def _tostr(obj):  # pragma: no cover
     """Convert to string if necessary."""
     return obj if isinstance(obj, str) else (obj.decode() if IS_PY3 else obj.encode())
+
+
+class StreamFile(object):
+    # pylint: disable=R0903
+    """Stream class."""
+
+    def __init__(self, lint_file):  # noqa
+        self.fname = lint_file
+
+    def __enter__(self):  # noqa
+        with open(self.fname, "r") as fobj:
+            for line in fobj:
+                yield line
+
+    def __exit__(self, exc_type, exc_value, exc_tb):  # noqa
+        return not exc_type is not None
+
+
+###
+# Hook-specific functions
+###
+def _make_abspath(value):
+    """Homogenize files to have absolute paths."""
+    value = value.strip()
+    if not os.path.isabs(value):
+        value = os.path.abspath(os.path.join(os.getcwd(), value))
+    return value
 
 
 def _valid_file(value):
@@ -148,7 +166,7 @@ def check_header(argv=None):
     retval = 0
     for fname in fnames:
         _, ext = os.path.splitext(fname)
-        if (ext in fdict) and _check_header(fname, fdict[ext]):
+        if (ext in fdict) and _check_header(fname, StreamFile, fdict[ext]):
             retval = 1
             print("    " + fname.strip())
     return retval
